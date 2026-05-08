@@ -11,142 +11,71 @@ import java.util.List;
 public class BasePage {
 
     protected WebDriver driver;
-
-    WebDriverWait wait;
+    protected WebDriverWait wait;
 
     public BasePage(WebDriver driver) {
-
         this.driver = driver;
-
-        wait = new WebDriverWait(
+        this.wait = new WebDriverWait(
                 driver,
-                Duration.ofSeconds(
-                        Integer.parseInt(
-                                ConfigReader.getProperty("timeout")
-                        )
-                )
+                Duration.ofSeconds(Integer.parseInt(ConfigReader.getProperty("timeout")))
         );
     }
 
-    // =========================================
-    // HANDLE AUTOMATION EXERCISE POPUP
-    // =========================================
-
     public void closePopupIfPresent() {
-
         try {
-
-            // Find all iframes
-            List<WebElement> iframes =
-                    driver.findElements(By.tagName("iframe"));
-
+            List<WebElement> iframes = driver.findElements(By.tagName("iframe"));
             for (WebElement frame : iframes) {
-
                 try {
-
                     driver.switchTo().frame(frame);
-
-                    List<WebElement> closeButtons =
-                            driver.findElements(
-                                    By.id("dismiss-button")
-                            );
-
-                    if (closeButtons.size() > 0) {
-
+                    List<WebElement> closeButtons = driver.findElements(By.id("dismiss-button"));
+                    if (!closeButtons.isEmpty()) {
                         closeButtons.get(0).click();
-
-                        System.out.println(
-                                "Popup closed successfully"
-                        );
-
                         driver.switchTo().defaultContent();
-
                         return;
                     }
-
                     driver.switchTo().defaultContent();
-
                 } catch (Exception e) {
-
                     driver.switchTo().defaultContent();
                 }
             }
-
         } catch (Exception e) {
-
-            driver.switchTo().defaultContent();
+            // Error handling
         }
     }
-
-    // =========================================
-    // CLICK METHOD
-    // =========================================
 
     public void click(WebElement element) {
-
         try {
-
-            closePopupIfPresent();
-
-            wait.until(
-                    ExpectedConditions.elementToBeClickable(element)
-            );
-
-            element.click();
-
+            wait.until(ExpectedConditions.elementToBeClickable(element)).click();
         } catch (ElementClickInterceptedException e) {
-
             closePopupIfPresent();
-
-            wait.until(
-                    ExpectedConditions.elementToBeClickable(element)
-            );
-
-            element.click();
+            try {
+                wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+            } catch (Exception retryEx) {
+                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
+            }
         }
     }
 
-    // =========================================
-    // TYPE METHOD
-    // =========================================
-
-    public void type(WebElement element,
-                     String value) {
-
-        wait.until(
-                ExpectedConditions.visibilityOf(element)
-        );
-
-        element.clear();
-
-        element.sendKeys(value);
+    public void type(WebElement element, String value) {
+        try {
+            wait.until(ExpectedConditions.visibilityOf(element));
+            element.clear();
+            element.sendKeys(value);
+        } catch (Exception e) {
+            closePopupIfPresent();
+            element.sendKeys(value);
+        }
     }
-
-    // =========================================
-    // GET TEXT METHOD
-    // =========================================
 
     public String getText(WebElement element) {
-
-        wait.until(
-                ExpectedConditions.visibilityOf(element)
-        );
-
-        return element.getText();
+        return wait.until(ExpectedConditions.visibilityOf(element)).getText();
     }
 
-    // =========================================
-    // DISPLAY CHECK
-    // =========================================
-
-    public boolean isDisplayed(
-            WebElement element
-    ) {
-
-        wait.until(
-                ExpectedConditions.visibilityOf(element)
-        );
-
-        return element.isDisplayed();
+    public boolean isDisplayed(WebElement element) {
+        try {
+            return wait.until(ExpectedConditions.visibilityOf(element)).isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

@@ -1,11 +1,14 @@
 package tests;
 
 import base.BaseTest;
+import listeners.TestListener;
 import org.testng.Assert;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import pages.HomePage;
 import pages.ValidationPage;
 
+@Listeners(TestListener.class)
 public class ValidationTest extends BaseTest {
 
     @Test
@@ -21,11 +24,7 @@ public class ValidationTest extends BaseTest {
 
         validation.clickSignup();
 
-        Assert.assertFalse(
-                validation
-                        .getNameValidationMessage()
-                        .isEmpty()
-        );
+        Assert.assertFalse(validation.getNameValidationMessage().isEmpty());
     }
 
     @Test
@@ -43,10 +42,6 @@ public class ValidationTest extends BaseTest {
 
         validation.clickSignup();
 
-        Assert.assertFalse(
-                validation
-                        .getEmailValidationMessage()
-                        .isEmpty()
-        );
+        Assert.assertFalse(validation.getEmailValidationMessage().isEmpty());
     }
 }

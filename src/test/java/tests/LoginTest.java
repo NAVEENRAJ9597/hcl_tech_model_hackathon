@@ -16,17 +16,11 @@ public class LoginTest extends BaseTest {
     @Test(dataProvider = "loginData",
             dataProviderClass = DataProviders.class)
 
-    public void loginTest(
-            String email,
-            String password,
-            boolean expected
-    ) {
+    public void loginTest(String email, String password, boolean expected) {
 
-        HomePage home =
-                new HomePage(driver);
+        HomePage home = new HomePage(driver);
 
-        LoginPage login =
-                new LoginPage(driver);
+        LoginPage login = new LoginPage(driver);
 
         home.clickSignupLogin();
 
@@ -34,15 +28,13 @@ public class LoginTest extends BaseTest {
 
         if (expected) {
 
-            Assert.assertTrue(
-                    login.isLogoutVisible()
-            );
+            Assert.assertTrue(login.isLogoutVisible());
 
         } else {
 
-            Assert.assertTrue(
-                    login.isErrorVisible()
-            );
+            Assert.assertTrue(login.isErrorVisible());
         }
     }
+
+
 }
