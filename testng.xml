@@ -1,0 +1,29 @@
+<!DOCTYPE suite SYSTEM
+        "https://testng.org/testng-1.0.dtd">
+
+<suite name="Automationexercise"
+       parallel="tests"
+       thread-count="2">
+
+    <listeners>
+
+        <listener class-name=
+                          "listeners.TestListener"/>
+
+    </listeners>
+
+    <test name="AutomationTests">
+
+        <classes>
+
+            <class name="tests.LoginTest"/>
+            <class name="tests.ProductTest"/>
+            <class name="tests.CartTest"/>
+            <class name="tests.CheckoutTest"/>
+            <class name="tests.ValidationTest"/>
+
+        </classes>
+
+    </test>
+
+</suite>
