@@ -6,11 +6,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.ConfigReader;
 
 import java.time.Duration;
+import java.util.List;
 
 public class BasePage {
 
     protected WebDriver driver;
-    protected WebDriverWait wait;
+
+    WebDriverWait wait;
 
     public BasePage(WebDriver driver) {
 
@@ -26,70 +28,74 @@ public class BasePage {
         );
     }
 
-    // =====================================================
-    // COMMON POPUP HANDLER
-    // =====================================================
+    // =========================================
+    // HANDLE AUTOMATION EXERCISE POPUP
+    // =========================================
 
     public void closePopupIfPresent() {
 
         try {
 
-            // wait max 5 sec for popup
-            WebDriverWait popupWait =
-                    new WebDriverWait(driver, Duration.ofSeconds(5));
+            // Find all iframes
+            List<WebElement> iframes =
+                    driver.findElements(By.tagName("iframe"));
 
-            WebElement closeBtn = popupWait.until(
-                    ExpectedConditions.visibilityOfElementLocated(
-                            By.xpath(
-                                    "//button[contains(text(),'×') or " +
-                                            "contains(text(),'Close') or " +
-                                            "contains(@class,'close') or " +
-                                            "contains(@class,'modal-close')]"
-                            )
-                    )
-            );
+            for (WebElement frame : iframes) {
 
-            if (closeBtn.isDisplayed()) {
+                try {
 
-                popupWait.until(
-                        ExpectedConditions.elementToBeClickable(closeBtn)
-                );
+                    driver.switchTo().frame(frame);
 
-                closeBtn.click();
+                    List<WebElement> closeButtons =
+                            driver.findElements(
+                                    By.id("dismiss-button")
+                            );
 
-                System.out.println("Popup Closed");
+                    if (closeButtons.size() > 0) {
+
+                        closeButtons.get(0).click();
+
+                        System.out.println(
+                                "Popup closed successfully"
+                        );
+
+                        driver.switchTo().defaultContent();
+
+                        return;
+                    }
+
+                    driver.switchTo().defaultContent();
+
+                } catch (Exception e) {
+
+                    driver.switchTo().defaultContent();
+                }
             }
-
-        } catch (TimeoutException e) {
-
-            // popup not appeared
-            System.out.println("Popup not appeared");
 
         } catch (Exception e) {
 
-            System.out.println("Unable to close popup");
+            driver.switchTo().defaultContent();
         }
     }
 
-    // =====================================================
-    // SAFE CLICK METHOD
-    // =====================================================
+    // =========================================
+    // CLICK METHOD
+    // =========================================
 
     public void click(WebElement element) {
 
-        closePopupIfPresent();
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(element)
-        );
-
         try {
+
+            closePopupIfPresent();
+
+            wait.until(
+                    ExpectedConditions.elementToBeClickable(element)
+            );
 
             element.click();
 
         } catch (ElementClickInterceptedException e) {
 
-            // popup blocked click
             closePopupIfPresent();
 
             wait.until(
@@ -100,13 +106,12 @@ public class BasePage {
         }
     }
 
-    // =====================================================
-    // SAFE TYPE METHOD
-    // =====================================================
+    // =========================================
+    // TYPE METHOD
+    // =========================================
 
-    public void type(WebElement element, String value) {
-
-        closePopupIfPresent();
+    public void type(WebElement element,
+                     String value) {
 
         wait.until(
                 ExpectedConditions.visibilityOf(element)
@@ -117,13 +122,11 @@ public class BasePage {
         element.sendKeys(value);
     }
 
-    // =====================================================
+    // =========================================
     // GET TEXT METHOD
-    // =====================================================
+    // =========================================
 
     public String getText(WebElement element) {
-
-        closePopupIfPresent();
 
         wait.until(
                 ExpectedConditions.visibilityOf(element)
@@ -132,29 +135,18 @@ public class BasePage {
         return element.getText();
     }
 
-    // =====================================================
-    // WAIT FOR ELEMENT VISIBLE
-    // =====================================================
+    // =========================================
+    // DISPLAY CHECK
+    // =========================================
 
-    public void waitForVisibility(WebElement element) {
-
-        closePopupIfPresent();
+    public boolean isDisplayed(
+            WebElement element
+    ) {
 
         wait.until(
                 ExpectedConditions.visibilityOf(element)
         );
-    }
 
-    // =====================================================
-    // WAIT FOR ELEMENT CLICKABLE
-    // =====================================================
-
-    public void waitForClickable(WebElement element) {
-
-        closePopupIfPresent();
-
-        wait.until(
-                ExpectedConditions.elementToBeClickable(element)
-        );
+        return element.isDisplayed();
     }
 }
